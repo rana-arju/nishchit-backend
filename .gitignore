@@ -1,0 +1,37 @@
+# Env
+.env*
+!.env.example
+
+# Node / frontend
+node_modules/
+.next/
+
+# Python / backend
+__pycache__/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Misc
+coverage/
+dist/
+*.log
+.DS_Store
+
+# AI tooling (local only, never pushed)
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+.claude/
+.cursor/
+.cursorrules
+.windsurfrules
+.aider*
+.continue/
+.codeium/
+.gemini/
+.specstory/
+.github/copilot-instructions.md
+ai-notes/
+prompts/
