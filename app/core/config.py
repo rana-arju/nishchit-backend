@@ -18,6 +18,7 @@ class Settings(BaseSettings):
 
     database_url: str
     api_v1_prefix: str = "/api/v1"
+    max_request_body_bytes: int = 5_000_000
 
     cors_allowed_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: ["http://localhost:3000"]
