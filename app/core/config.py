@@ -33,6 +33,16 @@ class Settings(BaseSettings):
     cookie_samesite: Literal["lax", "strict", "none"] = "lax"
     cookie_domain: str | None = None
 
+    frontend_url: str = "http://localhost:3000"
+
+    google_client_id: str | None = None
+    google_client_secret: str | None = None
+    google_redirect_uri: str | None = None
+
+    facebook_client_id: str | None = None
+    facebook_client_secret: str | None = None
+    facebook_redirect_uri: str | None = None
+
     @field_validator("cors_allowed_origins", mode="before")
     @classmethod
     def parse_cors_allowed_origins(cls, value: object) -> object:

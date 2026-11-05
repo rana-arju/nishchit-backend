@@ -40,3 +40,12 @@ class LoginRequest(CamelModel):
     @classmethod
     def validate_email(cls, value: str) -> str:
         return _normalize_email(value)
+
+
+class SetShopRequest(CamelModel):
+    shop_name: str = Field(min_length=1, max_length=150)
+
+    @field_validator("shop_name")
+    @classmethod
+    def strip_text(cls, value: str) -> str:
+        return value.strip()

@@ -19,7 +19,22 @@ GENERIC_HTTP_ERROR = "Something went wrong with your request."
 
 INVALID_EMAIL = "Please enter a valid email address."
 EMAIL_ALREADY_REGISTERED = "This email is already registered."
+EMAIL_REGISTERED_VIA_OTHER_METHOD = (
+    "This email is already registered using {provider}. Please log in using {provider} instead."
+)
+WRONG_LOGIN_METHOD = (
+    "You previously signed up using {provider}. Please log in using {provider} instead."
+)
 INVALID_CREDENTIALS = "Invalid email or password."
+OAUTH_EMAIL_NOT_PROVIDED = (
+    "We couldn't get an email address from your account. Please use a different sign-in method."
+)
+OAUTH_EXCHANGE_FAILED = "Could not complete sign-in. Please try again."
+GOOGLE_LOGIN_NOT_CONFIGURED = "Google sign-in is not configured yet."
+FACEBOOK_LOGIN_NOT_CONFIGURED = "Facebook sign-in is not configured yet."
+OAUTH_STATE_MISMATCH = "Sign-in session expired or is invalid. Please try again."
+SHOP_ALREADY_EXISTS = "You already have a shop set up."
+SHOP_SAVED = "Shop saved successfully!"
 INVALID_TOKEN = "Invalid or expired authentication token."
 TOKEN_EXPIRED = "Your session has expired. Please log in again."
 MISSING_REFRESH_TOKEN = "Refresh token is missing."

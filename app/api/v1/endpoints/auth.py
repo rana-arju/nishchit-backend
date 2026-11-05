@@ -5,7 +5,7 @@ from app.core import messages
 from app.core.cookies import REFRESH_TOKEN_COOKIE, clear_auth_cookies, set_auth_cookies
 from app.core.exceptions import Unauthorized
 from app.core.responses import success
-from app.schemas.auth import LoginRequest, RegisterRequest
+from app.schemas.auth import LoginRequest, RegisterRequest, SetShopRequest
 from app.schemas.common.response import ApiResponse
 from app.schemas.user import UserRead
 from app.services import auth_service
@@ -73,3 +73,11 @@ async def logout(response: Response) -> ApiResponse[None]:
 @router.get("/me", response_model=ApiResponse[UserRead])
 async def get_me(current_user: CurrentUser) -> ApiResponse[UserRead]:
     return success(data=UserRead.model_validate(current_user), message=messages.USER_FETCHED)
+
+
+@router.post("/shop", response_model=ApiResponse[UserRead])
+async def set_shop(
+    payload: SetShopRequest, session: DbSession, current_user: CurrentUser
+) -> ApiResponse[UserRead]:
+    user = await auth_service.set_shop(session, user=current_user, shop_name=payload.shop_name)
+    return success(data=UserRead.model_validate(user), message=messages.SHOP_SAVED)

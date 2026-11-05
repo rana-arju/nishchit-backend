@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.models.enums import AuthProvider
 from app.models.user import User
 
 
@@ -19,8 +20,15 @@ async def get_by_id(session: AsyncSession, user_id: UUID) -> User | None:
     return result.scalar_one_or_none()
 
 
-async def create(session: AsyncSession, *, name: str, email: str, password_hash: str) -> User:
-    user = User(name=name, email=email, password_hash=password_hash)
+async def create(
+    session: AsyncSession,
+    *,
+    name: str,
+    email: str,
+    password_hash: str | None,
+    auth_provider: AuthProvider = AuthProvider.LOCAL,
+) -> User:
+    user = User(name=name, email=email, password_hash=password_hash, auth_provider=auth_provider)
     session.add(user)
     await session.flush()
     return user
