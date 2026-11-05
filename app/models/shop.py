@@ -9,6 +9,7 @@ from app.db.base import Base, TimestampMixin, UUIDMixin
 if TYPE_CHECKING:
     from app.models.category import Category
     from app.models.lead import Lead
+    from app.models.order import Order
     from app.models.product import Product
     from app.models.user import User
 
@@ -27,3 +28,6 @@ class Shop(Base, UUIDMixin, TimestampMixin):
         back_populates="shop", cascade="all, delete-orphan"
     )
     leads: Mapped[list["Lead"]] = relationship(back_populates="shop", cascade="all, delete-orphan")
+    orders: Mapped[list["Order"]] = relationship(
+        back_populates="shop", cascade="all, delete-orphan"
+    )
