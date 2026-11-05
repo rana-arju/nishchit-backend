@@ -54,6 +54,11 @@ class Settings(BaseSettings):
     smtp_from_email: str = "no-reply@nishchit.local"
     smtp_use_tls: bool = True
 
+    cloudinary_cloud_name: str | None = None
+    cloudinary_api_key: str | None = None
+    cloudinary_api_secret: str | None = None
+    max_image_upload_bytes: int = 5_000_000
+
     @field_validator("cors_allowed_origins", mode="before")
     @classmethod
     def parse_cors_allowed_origins(cls, value: object) -> object:

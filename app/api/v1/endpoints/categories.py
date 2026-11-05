@@ -13,12 +13,11 @@ from app.services import category_service
 router = APIRouter(prefix="/categories", tags=["categories"])
 
 
-def _to_read(category: Category) -> CategoryRead:
-    # product_count is always 0 until the product catalog feature exists.
+def _to_read(category: Category, product_count: int) -> CategoryRead:
     return CategoryRead(
         id=category.id,
         name=category.name,
-        product_count=0,
+        product_count=product_count,
         created_at=category.created_at,
     )
 
@@ -27,9 +26,9 @@ def _to_read(category: Category) -> CategoryRead:
 async def list_categories(
     session: DbSession, current_user: CurrentUser
 ) -> ApiResponse[list[CategoryRead]]:
-    categories = await category_service.list_categories(session, user=current_user)
+    results = await category_service.list_categories(session, user=current_user)
     return success(
-        data=[_to_read(category) for category in categories],
+        data=[_to_read(category, count) for category, count in results],
         message=messages.CATEGORIES_FETCHED,
     )
 
@@ -38,11 +37,11 @@ async def list_categories(
 async def create_category(
     payload: CategoryCreateRequest, session: DbSession, current_user: CurrentUser
 ) -> ApiResponse[CategoryRead]:
-    category = await category_service.create_category(
+    category, count = await category_service.create_category(
         session, user=current_user, name=payload.name
     )
     return success(
-        data=_to_read(category),
+        data=_to_read(category, count),
         message=messages.CATEGORY_CREATED,
         status_code=status.HTTP_201_CREATED,
     )
@@ -55,10 +54,10 @@ async def update_category(
     session: DbSession,
     current_user: CurrentUser,
 ) -> ApiResponse[CategoryRead]:
-    category = await category_service.update_category(
+    category, count = await category_service.update_category(
         session, user=current_user, category_id=category_id, name=payload.name
     )
-    return success(data=_to_read(category), message=messages.CATEGORY_UPDATED)
+    return success(data=_to_read(category, count), message=messages.CATEGORY_UPDATED)
 
 
 @router.delete("/{category_id}", response_model=ApiResponse[None])

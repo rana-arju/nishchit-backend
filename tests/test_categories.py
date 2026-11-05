@@ -102,6 +102,36 @@ async def test_same_category_name_allowed_across_different_shops(client: AsyncCl
     assert second_response.status_code == 201
 
 
+async def test_category_product_count_reflects_real_products(client: AsyncClient) -> None:
+    await client.post("/api/v1/auth/register", json=_register_payload(_unique_email()))
+    create_response = await client.post("/api/v1/categories", json={"name": "Electronics"})
+    category_id = create_response.json()["data"]["id"]
+    assert create_response.json()["data"]["productCount"] == 0
+
+    for name in ("Speaker", "Headphones"):
+        await client.post(
+            "/api/v1/products",
+            json={
+                "name": name,
+                "description": "",
+                "categoryId": category_id,
+                "price": 500,
+                "discountPrice": None,
+                "imageUrl": None,
+                "imagePublicId": None,
+                "inStock": True,
+            },
+        )
+
+    list_response = await client.get("/api/v1/categories")
+    rename_response = await client.patch(
+        f"/api/v1/categories/{category_id}", json={"name": "Electronics & Gadgets"}
+    )
+
+    assert list_response.json()["data"][0]["productCount"] == 2
+    assert rename_response.json()["data"]["productCount"] == 2
+
+
 async def test_update_category_renames_it(client: AsyncClient) -> None:
     await client.post("/api/v1/auth/register", json=_register_payload(_unique_email()))
     create_response = await client.post("/api/v1/categories", json={"name": "Old Name"})

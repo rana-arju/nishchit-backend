@@ -6,7 +6,7 @@ from app.core import messages
 from app.core.exceptions import BadRequest, Conflict, NotFound
 from app.models.category import Category
 from app.models.user import User
-from app.repositories import category_repository
+from app.repositories import category_repository, product_repository
 
 
 def _require_shop_id(user: User) -> UUID:
@@ -15,13 +15,17 @@ def _require_shop_id(user: User) -> UUID:
     return user.shop.id
 
 
-async def list_categories(session: AsyncSession, *, user: User) -> list[Category]:
+async def list_categories(session: AsyncSession, *, user: User) -> list[tuple[Category, int]]:
     if user.shop is None:
         return []
-    return await category_repository.list_by_shop(session, user.shop.id)
+
+    categories = await category_repository.list_by_shop(session, user.shop.id)
+    counts = await product_repository.count_by_category(session, user.shop.id)
+
+    return [(category, counts.get(category.id, 0)) for category in categories]
 
 
-async def create_category(session: AsyncSession, *, user: User, name: str) -> Category:
+async def create_category(session: AsyncSession, *, user: User, name: str) -> tuple[Category, int]:
     shop_id = _require_shop_id(user)
 
     existing = await category_repository.get_by_name(session, shop_id, name)
@@ -31,12 +35,12 @@ async def create_category(session: AsyncSession, *, user: User, name: str) -> Ca
     category = await category_repository.create(session, shop_id=shop_id, name=name)
     await session.commit()
 
-    return category
+    return category, 0
 
 
 async def update_category(
     session: AsyncSession, *, user: User, category_id: UUID, name: str
-) -> Category:
+) -> tuple[Category, int]:
     shop_id = _require_shop_id(user)
 
     category = await category_repository.get_by_id(session, category_id, shop_id)
@@ -50,7 +54,8 @@ async def update_category(
         category.name = name
         await session.commit()
 
-    return category
+    counts = await product_repository.count_by_category(session, shop_id)
+    return category, counts.get(category.id, 0)
 
 
 async def delete_category(session: AsyncSession, *, user: User, category_id: UUID) -> None:

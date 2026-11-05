@@ -8,6 +8,7 @@ from app.db.base import Base, TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
     from app.models.category import Category
+    from app.models.product import Product
     from app.models.user import User
 
 
@@ -19,5 +20,8 @@ class Shop(Base, UUIDMixin, TimestampMixin):
 
     owner: Mapped["User"] = relationship(back_populates="shop")
     categories: Mapped[list["Category"]] = relationship(
+        back_populates="shop", cascade="all, delete-orphan"
+    )
+    products: Mapped[list["Product"]] = relationship(
         back_populates="shop", cascade="all, delete-orphan"
     )
