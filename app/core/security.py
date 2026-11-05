@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 from datetime import UTC, datetime, timedelta
 from typing import Literal
 from uuid import UUID
@@ -21,6 +23,14 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, password_hash: str) -> bool:
     return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
+
+
+def hash_otp(otp: str) -> str:
+    return hashlib.sha256(otp.encode("utf-8")).hexdigest()
+
+
+def verify_otp_hash(otp: str, otp_hash: str) -> bool:
+    return hmac.compare_digest(hash_otp(otp), otp_hash)
 
 
 def _create_token(user_id: UUID, token_type: TokenType, expires_delta: timedelta) -> str:

@@ -49,3 +49,58 @@ class SetShopRequest(CamelModel):
     @classmethod
     def strip_text(cls, value: str) -> str:
         return value.strip()
+
+
+_OTP_PATTERN = re.compile(r"^\d{6}$")
+
+
+def _validate_otp(value: str) -> str:
+    value = value.strip()
+    if not _OTP_PATTERN.match(value):
+        raise ValueError(messages.INVALID_OTP)
+    return value
+
+
+class ForgotPasswordRequest(CamelModel):
+    email: str
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, value: str) -> str:
+        return _normalize_email(value)
+
+
+class VerifyOtpRequest(CamelModel):
+    email: str
+    otp: str
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, value: str) -> str:
+        return _normalize_email(value)
+
+    @field_validator("otp")
+    @classmethod
+    def validate_otp(cls, value: str) -> str:
+        return _validate_otp(value)
+
+
+class ResetPasswordRequest(CamelModel):
+    email: str
+    otp: str
+    new_password: str = Field(min_length=6, max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, value: str) -> str:
+        return _normalize_email(value)
+
+    @field_validator("otp")
+    @classmethod
+    def validate_otp(cls, value: str) -> str:
+        return _validate_otp(value)
+
+
+class ChangePasswordRequest(CamelModel):
+    current_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=6, max_length=128)

@@ -132,6 +132,24 @@ async def set_shop(session: AsyncSession, *, user: User, shop_name: str) -> User
     return user
 
 
+async def change_password(
+    session: AsyncSession, *, user: User, current_password: str, new_password: str
+) -> None:
+    if user.auth_provider != AuthProvider.LOCAL or user.password_hash is None:
+        label = _provider_label(user.auth_provider)
+        raise Conflict(
+            messages.NO_PASSWORD_SET.format(provider=label), error_code="NO_PASSWORD_SET"
+        )
+
+    if not verify_password(current_password, user.password_hash):
+        raise Unauthorized(
+            messages.CURRENT_PASSWORD_INCORRECT, error_code="CURRENT_PASSWORD_INCORRECT"
+        )
+
+    user.password_hash = hash_password(new_password)
+    await session.commit()
+
+
 async def refresh_access_token(session: AsyncSession, *, refresh_token: str) -> AuthTokens:
     user_id = decode_token(refresh_token, expected_type=REFRESH_TOKEN_TYPE)
     user = await user_repository.get_by_id(session, user_id)

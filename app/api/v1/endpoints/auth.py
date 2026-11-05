@@ -5,10 +5,18 @@ from app.core import messages
 from app.core.cookies import REFRESH_TOKEN_COOKIE, clear_auth_cookies, set_auth_cookies
 from app.core.exceptions import Unauthorized
 from app.core.responses import success
-from app.schemas.auth import LoginRequest, RegisterRequest, SetShopRequest
+from app.schemas.auth import (
+    ChangePasswordRequest,
+    ForgotPasswordRequest,
+    LoginRequest,
+    RegisterRequest,
+    ResetPasswordRequest,
+    SetShopRequest,
+    VerifyOtpRequest,
+)
 from app.schemas.common.response import ApiResponse
 from app.schemas.user import UserRead
-from app.services import auth_service
+from app.services import auth_service, password_reset_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -81,3 +89,36 @@ async def set_shop(
 ) -> ApiResponse[UserRead]:
     user = await auth_service.set_shop(session, user=current_user, shop_name=payload.shop_name)
     return success(data=UserRead.model_validate(user), message=messages.SHOP_SAVED)
+
+
+@router.post("/forgot-password", response_model=ApiResponse[None])
+async def forgot_password(payload: ForgotPasswordRequest, session: DbSession) -> ApiResponse[None]:
+    await password_reset_service.request_password_reset(session, email=payload.email)
+    return success(data=None, message=messages.OTP_SENT)
+
+
+@router.post("/verify-otp", response_model=ApiResponse[None])
+async def verify_otp(payload: VerifyOtpRequest, session: DbSession) -> ApiResponse[None]:
+    await password_reset_service.verify_otp(session, email=payload.email, otp=payload.otp)
+    return success(data=None, message=messages.OTP_VERIFIED)
+
+
+@router.post("/reset-password", response_model=ApiResponse[None])
+async def reset_password(payload: ResetPasswordRequest, session: DbSession) -> ApiResponse[None]:
+    await password_reset_service.reset_password(
+        session, email=payload.email, otp=payload.otp, new_password=payload.new_password
+    )
+    return success(data=None, message=messages.PASSWORD_RESET_SUCCESSFUL)
+
+
+@router.post("/change-password", response_model=ApiResponse[None])
+async def change_password(
+    payload: ChangePasswordRequest, session: DbSession, current_user: CurrentUser
+) -> ApiResponse[None]:
+    await auth_service.change_password(
+        session,
+        user=current_user,
+        current_password=payload.current_password,
+        new_password=payload.new_password,
+    )
+    return success(data=None, message=messages.PASSWORD_CHANGED_SUCCESSFUL)
